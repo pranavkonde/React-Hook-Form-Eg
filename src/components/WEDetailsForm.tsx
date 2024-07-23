@@ -31,26 +31,6 @@ export default function WEDetailsForm({
     // navigate("/submit");
   };
 
-  const finalSubmit = async (data: any) => {
-    try {
-      const response = await fetch("https://6699ff789ba098ed61fdf102.mockapi.io/form", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const responseData = await response.json();
-      console.log("finalSubmit", responseData);
-      onSubmitSuccess(responseData);
-    } catch (error) {
-      console.error("There has been a problem with your fetch operation:", error);
-    }
-  };
-
   const onDraft: SubmitHandler<Inputs> = (data) => {
     saveAsDraft(data);
   };

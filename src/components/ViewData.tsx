@@ -2,10 +2,41 @@ import { Accordion, AccordionDetails, AccordionSummary, Button, Typography } fro
 import React, { useContext } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DataContext } from "./DataContext";
+import { SubmitHandler } from "react-hook-form";
+import { Inputs } from "./Slider";
+import { useNavigate } from "react-router-dom";
 
-const ViewData = ({ getValues, firstStep }: any) => {
+const ViewData = ({ getValues, firstStep, handleSubmit, onSubmitSuccess }: any) => {
   // const { data, setData } = useContext(DataContext);
+  const navigate = useNavigate();
   const data = getValues();
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    // console.log("Data of WE", data);
+    // onNext(data);
+    onSubmitSuccess(data);
+    finalSubmit(data);
+    navigate("/submit");
+  };
+
+  const finalSubmit = async (data: any) => {
+    try {
+      const response = await fetch("https://6699ff789ba098ed61fdf102.mockapi.io/form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const responseData = await response.json();
+      console.log("finalSubmit", responseData);
+      onSubmitSuccess(responseData);
+    } catch (error) {
+      console.error("There has been a problem with your fetch operation:", error);
+    }
+  };
 
   return (
     <div>
@@ -13,9 +44,9 @@ const ViewData = ({ getValues, firstStep }: any) => {
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
           <Typography className='accordion-title'>{data.fullName}</Typography>
           <div className='ml-5'>
-            <Button onClick={firstStep} variant='contained' color='primary' className=''>
+            {/* <Button onClick={firstStep} variant='contained' color='primary' className=''>
               Edit
-            </Button>
+            </Button> */}
             {/* <Button onClick={() => handleDelete(data.id)} variant='contained' color='secondary'>
               Delete
             </Button> */}
@@ -37,6 +68,7 @@ const ViewData = ({ getValues, firstStep }: any) => {
           </Typography>
         </AccordionDetails>
       </Accordion>
+      <Button onClick={handleSubmit(onSubmit)}>Submit</Button>
     </div>
   );
 };

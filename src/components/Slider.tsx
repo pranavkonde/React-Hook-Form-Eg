@@ -171,7 +171,16 @@ export default function Slider() {
               previousStep={previousStep}
             />
           )}
-          {activeStep === 3 && <ViewData getValues={getValues} firstStep={firstStep} />}
+          {activeStep === 3 && (
+            <ViewData
+              getValues={getValues}
+              firstStep={firstStep}
+              handleSubmit={handleSubmit}
+              onNext={onNext}
+              errors={errors}
+              onSubmitSuccess={handleAccordionToggle}
+            />
+          )}
         </Box>
       </>
     </div>

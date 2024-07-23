@@ -1,45 +1,62 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Button from '@mui/material/Button';
-import { useNavigate } from 'react-router-dom';
-import { DataContext } from './DataContext';
+import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
+import { DataContext } from "./DataContext";
 
 function DraftData({ onDelete, onEdit }: any) {
   const navigate = useNavigate();
-  const { data, fetchData } = useContext(DataContext);
+  const { data, setData } = useContext(DataContext);
+  const [draftData, setDraftData] = useState([]);
 
   const handleEdit = (itemId: number) => {
     navigate(`/edit/${itemId}`);
   };
 
+  const fetchData = () => {
+    fetch("https://6699ff789ba098ed61fdf102.mockapi.io/draft")
+      .then((response) => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then((fetchedData) => {
+        setDraftData(fetchedData);
+      })
+      .catch((error) => console.error("There has been a problem with your fetch operation:", error));
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const handleDelete = (itemId: number) => {
     fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/${itemId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     })
       .then(() => {
         fetchData();
         onDelete(itemId);
       })
-      .catch(error => console.error('Error deleting item:', error));
+      .catch((error) => console.error("Error deleting item:", error));
   };
 
   return (
-    <div className="container m-5">
-      {data.map((item: any, index: number) => (
-        <Accordion key={index} className="mb-3">
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Typography className="accordion-title">{item.fullName}</Typography>
+    <div className='container m-5'>
+      {draftData.map((item: any, index: number) => (
+        <Accordion key={index} className='mb-3'>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
+            <Typography className='accordion-title'>{item.fullName}</Typography>
             <div className='ml-5'>
-              <Button onClick={() => handleEdit(item.id)} variant="contained" color="primary" className=''>Edit</Button>
-              <Button onClick={() => handleDelete(item.id)} variant="contained" color="secondary">Delete</Button>
+              <Button onClick={() => handleEdit(item.id)} variant='contained' color='primary' className=''>
+                Edit
+              </Button>
+              <Button onClick={() => handleDelete(item.id)} variant='contained' color='secondary'>
+                Delete
+              </Button>
             </div>
           </AccordionSummary>
           <AccordionDetails>

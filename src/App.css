@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 80%;
+}
+
+.button {
+  margin-left: 10px;
+}
+
+.button + .button {
+  margin-left: 15px; /* Add extra space between buttons */
+}

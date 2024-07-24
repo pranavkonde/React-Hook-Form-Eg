@@ -13,6 +13,7 @@ function StepperForm() {
         <Route path='/submit' element={<AccordionComponent />} />
         <Route path='/draft' element={<DraftData />} />
         <Route path='/edit/:id' element={<Slider />} />
+        <Route path='/data/:formId' element={<Slider />} />
       </Routes>
     </Router>
   );

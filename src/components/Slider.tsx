@@ -72,6 +72,7 @@ export default function Slider() {
   });
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
     setValue,
@@ -144,6 +145,7 @@ export default function Slider() {
           {activeStep === 0 && (
             <PersonalDetailsForm
               register={register}
+              reset={reset}
               setValue={setValue}
               onNext={onNext}
               errors={errors}

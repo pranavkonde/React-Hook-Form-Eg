@@ -50,11 +50,11 @@ function DraftData({ onDelete, onEdit }: any) {
         <Accordion key={index} className='mb-3'>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
             <Typography className='accordion-title'>{item.fullName}</Typography>
-            <div className='ml-5'>
-              <Button onClick={() => handleEdit(item.id)} variant='contained' color='primary' className=''>
+            <div className='button-container'>
+              <Button onClick={() => handleEdit(item.id)} variant='contained' color='primary' className='button'>
                 Edit
               </Button>
-              <Button onClick={() => handleDelete(item.id)} variant='contained' color='secondary'>
+              <Button onClick={() => handleDelete(item.id)} variant='contained' color='secondary' className='button'>
                 Delete
               </Button>
             </div>

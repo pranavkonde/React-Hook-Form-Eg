@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -6,15 +6,16 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { DataContext } from "./DataContext";
 
 function AccordionComponent() {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
+  const [allData, setAllData] = useState([]);
+  const { data, setData } = useContext(DataContext);
 
   useEffect(() => {
     fetchData();
-  }, [data]);
+  }, []);
 
   const fetchData = () => {
     fetch("https://6699ff789ba098ed61fdf102.mockapi.io/form")
@@ -23,25 +24,14 @@ function AccordionComponent() {
         return response.json();
       })
       .then((fetchedData) => {
-        setData(fetchedData);
+        setAllData(fetchedData);
       })
       .catch((error) => console.error("There has been a problem with your fetch operation:", error));
   };
 
-  // useEffect(() => {
-  //     fetch('https://6699ff789ba098ed61fdf102.mockapi.io/form')
-  //       .then(response => {
-  //           if (!response.ok) throw new Error('Network response was not ok');
-  //           return response.json();
-  //       })
-  //       .then(fetchedData => {
-  //           setData(fetchedData);
-  //       })
-  //       .catch(error => console.error('There has been a problem with your fetch operation:', error));
-  // }, []);
-
-  const handleEdit = () => {
-    navigate("/");
+  const handleEdit = (item: any) => {
+    setData(item);
+    navigate(`/data/${item.id}`);
   };
 
   const handleDelete = async (itemId: number) => {
@@ -57,15 +47,15 @@ function AccordionComponent() {
 
   return (
     <div className='container m-5'>
-      {data.map((item: any, index: number) => (
+      {allData.map((item: any, index: number) => (
         <Accordion key={index} className='mb-3'>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel1a-content' id='panel1a-header'>
             <Typography className='accordion-title'>{item.fullName}</Typography>
-            <div className='ml-5'>
-              <Button onClick={handleEdit} variant='contained' color='primary' className=''>
+            <div className='button-container'>
+              <Button onClick={() => handleEdit(item)} variant='contained' color='primary' className='button'>
                 Edit
               </Button>
-              <Button onClick={() => handleDelete(item.id)} variant='contained' color='secondary'>
+              <Button onClick={() => handleDelete(item.id)} variant='contained' color='secondary' className='button'>
                 Delete
               </Button>
             </div>

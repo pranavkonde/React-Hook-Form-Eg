@@ -1,63 +1,58 @@
-import { useState, useEffect, useContext } from "react";
-import { SubmitHandler } from "react-hook-form";
+import React, { useState, useEffect, useContext } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { Inputs } from "./Slider";
 import { DataContext } from "./DataContext";
+import { Inputs } from "./Slider";
 
-export default function PersonalDetailsForm({ register, setValue, onNext, errors, handleSubmit }: any) {
+export default function PersonalDetailsForm({ onNext }: any) {
   const { id } = useParams();
   const { data, setData } = useContext(DataContext);
-  // console.log(data);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({
+    defaultValues: data,
+  });
 
   useEffect(() => {
-    setValue("fullName", data.fullName);
-    setValue("email", data.email);
-    setValue("gender", data.gender);
-    setValue("nationality", data.nationality);
-    setValue("address", data.address);
-  }, [data]);
+    Object.keys(data).forEach((key) => {
+      setValue(key as keyof Inputs, data[key]);
+    });
+  }, [data, setValue]);
 
   const onSubmit: SubmitHandler<Inputs> = (dataNew) => {
+    setData(dataNew);
     onNext(dataNew);
   };
 
   const onDraft: SubmitHandler<Inputs> = (dataNew) => {
     saveAsDraft(dataNew);
+    setData(dataNew);
   };
 
-  const saveAsDraft = async (data: any) => {
+  const saveAsDraft = async (data: Inputs) => {
     try {
-      if (id) {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+      const method = id ? "PUT" : "POST";
+      const endpoint = id
+        ? `https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`
+        : `https://6699ff789ba098ed61fdf102.mockapi.io/draft/`;
 
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        const result = await response.json();
-        console.log(result);
-      } else {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
-
-        const result = await response.json();
-        console.log(result);
+      if (!response.ok) {
+        throw new Error("Failed to save draft");
       }
+
+      const result = await response.json();
+      console.log(result);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -70,10 +65,22 @@ export default function PersonalDetailsForm({ register, setValue, onNext, errors
           <h2 className='mb-4'>Personal Details</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className='mb-3'>
-              <input type='text' className='form-control' {...register("fullName")} placeholder='Full Name' />
+              <input
+                type='text'
+                className='form-control'
+                {...register("fullName", { required: true })}
+                placeholder='Full Name'
+              />
+              {errors.fullName && <span className='text-danger'>Full Name is required</span>}
             </div>
             <div className='mb-3'>
-              <input type='text' className='form-control' {...register("email")} placeholder='Email' />
+              <input
+                type='text'
+                className='form-control'
+                {...register("email", { required: true })}
+                placeholder='Email'
+              />
+              {errors.email && <span className='text-danger'>Email is required</span>}
             </div>
             <div className='mb-3'>
               <label htmlFor='gender' className='form-label'>
@@ -83,25 +90,44 @@ export default function PersonalDetailsForm({ register, setValue, onNext, errors
                 <label htmlFor='male' className='form-check-label mr-5'>
                   Male
                 </label>
-                <input id='male' type='radio' value='male' className='form-check-input' {...register("gender")} />
+                <input
+                  id='male'
+                  type='radio'
+                  value='male'
+                  className='form-check-input'
+                  {...register("gender", { required: true })}
+                />
                 <label htmlFor='female' className='form-check-label mr-5'>
                   Female
                 </label>
-                <input id='female' type='radio' value='female' className='form-check-input' {...register("gender")} />
+                <input
+                  id='female'
+                  type='radio'
+                  value='female'
+                  className='form-check-input'
+                  {...register("gender", { required: true })}
+                />
               </div>
+              {errors.gender && <span className='text-danger'>Gender is required</span>}
             </div>
             <div className='mb-3'>
               <label htmlFor='nationality' className='form-label'>
                 Nationality
               </label>
-              <select {...register("nationality")}>
+              <select className='form-control' {...register("nationality", { required: true })}>
                 <option value=''>Select Nationality</option>
                 <option value='Indian'>Indian</option>
                 <option value='American'>American</option>
               </select>
+              {errors.nationality && <span className='text-danger'>Nationality is required</span>}
             </div>
             <div className='mb-3'>
-              <textarea className='form-control' {...register("address")} placeholder='Address'></textarea>
+              <textarea
+                className='form-control'
+                {...register("address", { required: true })}
+                placeholder='Address'
+              ></textarea>
+              {errors.address && <span className='text-danger'>Address is required</span>}
             </div>
             <button type='submit' className='btn btn-primary'>
               Next

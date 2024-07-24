@@ -1,73 +1,62 @@
+import React, { useContext, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { SubmitHandler } from "react-hook-form";
-import { Inputs } from "./Slider";
-import { useContext, useEffect } from "react";
 import { DataContext } from "./DataContext";
+import { Inputs } from "./Slider";
 
-export default function WEDetailsForm({
-  register,
-  setValue,
-  handleSubmit,
-  onSubmitSuccess,
-  onNext,
-  errors,
-  previousStep,
-}: any) {
+export default function WEDetailsForm({ onNext, previousStep }: any) {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data, setData } = useContext(DataContext);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({
+    defaultValues: data,
+  });
 
   useEffect(() => {
-    setValue("company", data.company);
-    setValue("totalExperience", data.totalExperience);
-    setValue("location", data.location);
-  }, [data]);
+    Object.keys(data).forEach((key) => {
+      setValue(key as keyof Inputs, data[key]);
+    });
+  }, [data, setValue]);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log("Data of WE", data);
-    onNext(data);
-    // onSubmitSuccess(data);
-    // finalSubmit(data);
+  const onSubmit: SubmitHandler<Inputs> = (dataNew) => {
+    setData(dataNew);
+    onNext(dataNew);
+    // onSubmitSuccess(dataNew);
+    // finalSubmit(dataNew);
     // navigate("/submit");
   };
 
-  const onDraft: SubmitHandler<Inputs> = (data) => {
-    saveAsDraft(data);
+  const onDraft: SubmitHandler<Inputs> = (dataNew) => {
+    saveAsDraft(dataNew);
+    setData(dataNew);
   };
 
-  const saveAsDraft = async (data: any) => {
+  const saveAsDraft = async (data: Inputs) => {
     try {
-      if (id) {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+      const method = id ? "PUT" : "POST";
+      const endpoint = id
+        ? `https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`
+        : `https://6699ff789ba098ed61fdf102.mockapi.io/draft/`;
 
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        const result = await response.json();
-        console.log(result);
-      } else {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
-
-        const result = await response.json();
-        console.log(result);
+      if (!response.ok) {
+        throw new Error("Failed to save draft");
       }
+
+      const result = await response.json();
+      console.log(result);
     } catch (error) {
       console.error("Error:", error);
     }

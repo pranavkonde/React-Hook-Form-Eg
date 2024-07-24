@@ -1,58 +1,58 @@
-import { SubmitHandler } from "react-hook-form";
-import { Inputs } from "./Slider";
-import { useContext, useEffect } from "react";
-import { DataContext } from "./DataContext";
+import React, { useContext, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useParams } from "react-router-dom";
+import { DataContext } from "./DataContext";
+import { Inputs } from "./Slider";
 
-export default function EducationDetailsForm({ register, setValue, onNext, errors, handleSubmit, previousStep }: any) {
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    onNext(data);
-  };
-  const { data, setData } = useContext(DataContext);
+export default function EducationDetailsForm({ onNext, previousStep }: any) {
   const { id } = useParams();
-  const onDraft: SubmitHandler<Inputs> = (data) => {
-    saveAsDraft(data);
-  };
+  const { data, setData } = useContext(DataContext);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({
+    defaultValues: data,
+  });
 
   useEffect(() => {
-    setValue("qualification", data.qualification);
-    setValue("collegeName", data.collegeName);
-    setValue("grade", data.grade);
-  }, [data]);
+    Object.keys(data).forEach((key) => {
+      setValue(key as keyof Inputs, data[key]);
+    });
+  }, [data, setValue]);
 
-  const saveAsDraft = async (data: any) => {
+  const onSubmit: SubmitHandler<Inputs> = (dataNew) => {
+    setData(dataNew);
+    onNext(dataNew);
+  };
+
+  const onDraft: SubmitHandler<Inputs> = (dataNew) => {
+    saveAsDraft(dataNew);
+    setData(dataNew);
+  };
+
+  const saveAsDraft = async (data: Inputs) => {
     try {
-      if (id) {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+      const method = id ? "PUT" : "POST";
+      const endpoint = id
+        ? `https://6699ff789ba098ed61fdf102.mockapi.io/draft/${id}`
+        : `https://6699ff789ba098ed61fdf102.mockapi.io/draft/`;
 
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        const result = await response.json();
-        console.log(result);
-      } else {
-        const response = await fetch(`https://6699ff789ba098ed61fdf102.mockapi.io/draft/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to save draft");
-        }
-
-        const result = await response.json();
-        console.log(result);
+      if (!response.ok) {
+        throw new Error("Failed to save draft");
       }
+
+      const result = await response.json();
+      console.log(result);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -69,26 +69,30 @@ export default function EducationDetailsForm({ register, setValue, onNext, error
                 <input
                   type='text'
                   className='form-control'
-                  {...register("qualification")}
+                  {...register("qualification", { required: "Qualification is required" })}
                   placeholder='Qualification'
                 />
-                {/* {errors.qualification && (
-                    <p style={{ color: "red" }}>{errors.qualification.message}</p>
-                  )} */}
+                {errors.qualification && <p style={{ color: "red" }}>{errors.qualification.message}</p>}
               </div>
               <div className='col-md-6'>
-                <input type='text' className='form-control' {...register("collegeName")} placeholder='College Name' />
-                {/* {errors.collegeName && (
-                    <p style={{ color: "red" }}>{errors.collegeName.message}</p>
-                  )} */}
+                <input
+                  type='text'
+                  className='form-control'
+                  {...register("collegeName", { required: "College Name is required" })}
+                  placeholder='College Name'
+                />
+                {errors.collegeName && <p style={{ color: "red" }}>{errors.collegeName.message}</p>}
               </div>
             </div>
             <div className='row mb-3'>
               <div className='col-md-12'>
-                <input type='text' className='form-control' {...register("grade")} placeholder='Grade' />
-                {/* {errors.grade && (
-                    <p style={{ color: "red" }}>{errors.grade.message}</p>
-                  )} */}
+                <input
+                  type='text'
+                  className='form-control'
+                  {...register("grade", { required: "Grade is required" })}
+                  placeholder='Grade'
+                />
+                {errors.grade && <p style={{ color: "red" }}>{errors.grade.message}</p>}
               </div>
             </div>
             <button type='button' className='btn btn-primary m-5' onClick={previousStep}>
